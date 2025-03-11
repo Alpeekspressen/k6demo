@@ -41,9 +41,8 @@ jobs:
 
     - name: Start .NET Core API (Background)
       run: |
-        dotnet run --project YourApiProject.csproj --urls "http://localhost:5110" &
+        dotnet run --project k6demoapi.csproj --urls "http://localhost:5110" &
         sleep 5  # Wait for API to start
-
 
     - name: Run local k6 test
       uses: grafana/run-k6-action@v1
