@@ -1,0 +1,59 @@
+name: .NET 9 Build & K6 Performance Test
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET 9
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'  # Updated to .NET 9
+
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    - name: Build Project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run Unit Tests
+      run: dotnet test --no-build --verbosity normal
+
+  k6-performance-test:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Install K6
+      run: |
+        curl -s https://packagecloud.io/install/repositories/loadimpact/k6/script.deb.sh | sudo bash
+        sudo apt-get install k6
+
+    - name: Start .NET Core API (Background)
+      run: |
+        dotnet run --project YourApiProject.csproj --urls "http://localhost:5110" &
+        sleep 5  # Wait for API to start
+
+    - name: Run K6 Performance Test
+      id: k6
+      run: k6 run test/performance/perftest.js
+      continue-on-error: true
+
+    - name: Fail Build if K6 Test Fails
+      run: |
+        if [ ${{ steps.k6.outcome }} != "success" ]; then
+          echo "K6 Performance Test failed. Failing the build!"
+          exit 1
+        fi
