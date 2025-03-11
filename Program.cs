@@ -9,5 +9,6 @@ var app = builder.Build();
     app.UseSwaggerUI();
 
 app.MapGet("/", () => "Hello K6!");
+app.MapGet("/health", () => "Running");
 
 app.Run();

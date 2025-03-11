@@ -14,10 +14,10 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Setup .NET 9
+    - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '9.0.x'  # Updated to .NET 9
+        dotnet-version: '8.0.x'
 
     - name: Restore Dependencies
       run: dotnet restore
@@ -36,20 +36,27 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Install K6
-      run: |
-        curl -s https://packagecloud.io/install/repositories/loadimpact/k6/script.deb.sh | sudo bash
-        sudo apt-get install k6
+    - name: Setup K6
+      uses: grafana/setup-k6-action@v1
 
-    - name: Start .NET Core API (Background)
+    - name: Start API (Background)
       run: |
-        dotnet run --project YourApiProject.csproj --urls "http://localhost:5110" &
-        sleep 5  # Wait for API to start
-
-    - name: Run K6 Performance Test
-      id: k6
-      run: k6 run test/performance/perftest.js
-      continue-on-error: true
+        dotnet run --project k6demoapi.csproj --urls "http://localhost:5110" &
+        sleep 5  # Initial wait for API to start
+             
+    - name: Wait for API to be ready
+      run: |
+        while ! curl -s http://localhost:5110/health; do
+          echo "Waiting for API..."
+          sleep 3
+        done
+        echo "API is up and running!"
+      
+    - name: Run local k6 test
+      uses: grafana/run-k6-action@v1
+      with:
+        path: test/performance/perftest.js
+        parallel: true
 
     - name: Fail Build if K6 Test Fails
       run: |
