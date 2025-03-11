@@ -1,10 +1,9 @@
-name: .NET 9 Build & K6 Performance Test
+name: Build & K6 Performance Test
 
 on: 
-  push:
+  pull_request:
     branches:
       - main
-  pull_request:
 
 jobs:
   build-and-test:
