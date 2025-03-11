@@ -1,0 +1,65 @@
+name: Build & K6 Performance Test
+
+on: 
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    - name: Build Project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run Unit Tests
+      run: dotnet test --no-build --verbosity normal
+
+  k6-performance-test:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup K6
+      uses: grafana/setup-k6-action@v1
+
+    - name: Start API (Background)
+      run: |
+        dotnet run --project k6demoapi.csproj --urls "http://localhost:5110" &
+        sleep 5  # Initial wait for API to start
+             
+    - name: Wait for API to be ready
+      run: |
+        while ! curl -s http://localhost:5110/health; do
+          echo "Waiting for API..."
+          sleep 3
+        done
+        echo "API is up and running!"
+      
+    - name: Run local k6 test
+      uses: grafana/run-k6-action@v1
+      with:
+        path: test/performance/perftest.js
+        parallel: true
+
+    - name: Fail Build if K6 Test Fails
+      run: |
+        if [ ${{ steps.k6.outcome }} != "success" ]; then
+          echo "K6 Performance Test failed. Failing the build!"
+          exit 1
+        fi
