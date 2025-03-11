@@ -7,14 +7,14 @@ export let options = {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: [
-        { duration: '10s', target: 10 }, // Ramp up to 10 users
-        { duration: '10s', target: 10 }, // Hold at 10 users
+        { duration: '10s', target: 15 }, // Ramp up
+        { duration: '10s', target: 15 }, // Hold
         { duration: '10s', target: 0 }    // Ramp down
       ]
     }
   },
   thresholds: {
-    'http_req_duration': ['p(95)<2'], // 95% of requests must be < 200ms
+    'http_req_duration': ['p(99)<2'], // 99% of requests must be < 200ms
   },
 };
 
