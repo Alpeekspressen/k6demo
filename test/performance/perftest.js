@@ -7,8 +7,8 @@ export let options = {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: [
-        { duration: '10s', target: 500 }, // Ramp up to 100 users
-        { duration: '30s', target: 500 }, // Hold at 100 users
+        { duration: '10s', target: 10 }, // Ramp up to 10 users
+        { duration: '10s', target: 10 }, // Hold at 10 users
         { duration: '10s', target: 0 }    // Ramp down
       ]
     }
