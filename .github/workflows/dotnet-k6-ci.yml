@@ -17,7 +17,7 @@ jobs:
     - name: Setup .NET 9
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '9.0.x'  # Updated to .NET 9
+        dotnet-version: '9.0.x'
 
     - name: Restore Dependencies
       run: dotnet restore
@@ -34,22 +34,21 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Install K6
-      run: |
-        curl -s https://packagecloud.io/install/repositories/loadimpact/k6/script.deb.sh | sudo bash
-        sudo apt-get install k6
+    - name: Setup K6
+      uses: grafana/setup-k6-action@v1
 
     - name: Start .NET Core API (Background)
       run: |
         dotnet run --project YourApiProject.csproj --urls "http://localhost:5110" &
         sleep 5  # Wait for API to start
 
-    - name: Run K6 Performance Test
-      id: k6
-      run: k6 run test/performance/perftest.js
-      continue-on-error: true
+
+    - name: Run local k6 test
+      uses: grafana/run-k6-action@v1
+      with:
+        path: test/performance/perftest.js      
 
     - name: Fail Build if K6 Test Fails
       run: |
