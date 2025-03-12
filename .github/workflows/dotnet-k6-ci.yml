@@ -52,6 +52,7 @@ jobs:
         echo "API is up and running!"
       
     - name: Run local k6 test
+      id: k6
       uses: grafana/run-k6-action@v1
       with:
         path: test/performance/perftest.js
@@ -59,6 +60,7 @@ jobs:
 
     - name: Fail Build if K6 Test Fails
       run: |
+        echo "K6 Performance Test outcome: ${{ steps.k6.outcome }}"
         if [ ${{ steps.k6.outcome }} != "success" ]; then
           echo "K6 Performance Test failed. Failing the build!"
           exit 1
