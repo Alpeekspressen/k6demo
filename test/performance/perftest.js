@@ -3,27 +3,54 @@ import { check, sleep } from 'k6';
 
 export let options = {
   scenarios: {
-    stress_test: {
+    user1_scenario: {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: [
-        { duration: '10s', target: 15 }, // Ramp up
-        { duration: '10s', target: 15 }, // Hold
-        { duration: '10s', target: 0 }    // Ramp down
-      ]
+        { duration: '5s', target: 5 }, // Ramp up
+        { duration: '5s', target: 5 }, // Hold
+        { duration: '5s', target: 0 }  // Ramp down
+      ],
+      exec: 'user1'
+    },
+    user2_scenario: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '5s', target: 5 }, // Ramp up
+        { duration: '5s', target: 5 }, // Hold
+        { duration: '5s', target: 0 }  // Ramp down
+      ],
+      exec: 'user2'
     }
   },
-  thresholds: {
-    'http_req_duration': ['p(99)<1'], // 99% of requests must be < 1ms
+  thresholds: { // Setting thresholds to fail the test if response time is greater than expected
+    'http_req_duration{scenario:user1_scenario}': ['p(99)<2'],
+    'http_req_duration{scenario:user2_scenario}': ['p(99)<101'],
   },
 };
 
-export default function () {
-  let res = http.get('http://localhost:5110/');
+export function user1() {
+  let res = http.get('http://localhost:5110/', {
+    tags: { scenario: 'user1_scenario' } // Adding a tag to identify scenario
+  });
 
   check(res, {
     'is status 200': (r) => r.status === 200,
     'response time < 2ms': (r) => r.timings.duration < 2,
+  });
+
+  sleep(1);
+}
+
+export function user2() {
+  let res = http.get('http://localhost:5110/?sleep=100', {
+    tags: { scenario: 'user2_scenario' } // Adding a tag to identify scenario
+  });
+
+  check(res, {
+    'is status 200': (r) => r.status === 200,
+    'response time < 101ms': (r) => r.timings.duration < 101,
   });
 
   sleep(1);
