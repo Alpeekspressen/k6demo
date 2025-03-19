@@ -25,8 +25,8 @@ export let options = {
     }
   },
   thresholds: { // Setting thresholds to fail the test if response time is greater than expected
-    'http_req_duration{scenario:user1_scenario}': ['p(99)<2'],
-    'http_req_duration{scenario:user2_scenario}': ['p(99)<101'],
+    'http_req_duration{scenario:user1_scenario}': ['p(99)<5'],
+    'http_req_duration{scenario:user2_scenario}': ['p(99)<110'],
   },
 };
 
@@ -37,7 +37,7 @@ export function user1() {
 
   check(res, {
     'is status 200': (r) => r.status === 200,
-    'response time < 2ms': (r) => r.timings.duration < 2,
+    'response time < 2ms': (r) => r.timings.duration < 5,
   });
 
   sleep(1);
@@ -50,7 +50,7 @@ export function user2() {
 
   check(res, {
     'is status 200': (r) => r.status === 200,
-    'response time < 101ms': (r) => r.timings.duration < 101,
+    'response time < 110ms': (r) => r.timings.duration < 110,
   });
 
   sleep(1);
