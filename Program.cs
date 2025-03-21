@@ -8,11 +8,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapGet("/", async (HttpContext context) =>
-{
-    await HandleRequest(context);
-});
-
+app.MapGet("/", HandleRequest);
 app.MapGet("/health", () => "Running");
 
 app.Run();
