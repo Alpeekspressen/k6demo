@@ -1,0 +1,1 @@
+k6 run perftest.js --out influxdb=http://localhost:8086/k6
