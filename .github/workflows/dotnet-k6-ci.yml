@@ -1,6 +1,9 @@
-name: Build & K6 Performance Test
+name: Build, Performance & Integrtion Test
 
 on: 
+  push:
+    branches:
+      - develop
   pull_request:
     branches:
       - main
@@ -103,11 +106,4 @@ jobs:
         newman run test/integration/k6demoapi.postman_collection.json \
           --reporters cli,junit \
           --reporter-junit-export test-results/newman-report.xml
-
-    - name: Publish Test Results
-      uses: dorny/test-reporter@v1
-      with:
-        name: Newman Integration Tests
-        path: test-results/newman-report.xml
-        reporter: junit
       
