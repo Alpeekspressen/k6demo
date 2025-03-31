@@ -1,17 +1,23 @@
 name: Start API
 description: Starts the .NET API and waits until it is ready
+
+inputs:
+  url:
+    description: The URL to run the API on
+    required: true
+
 runs:
   using: "composite"
   steps:
     - run: |
-        dotnet run --project k6demoapi.csproj --urls "http://localhost:5110" &
+        dotnet run --project k6demoapi.csproj --urls "${{ inputs.url }}" &
         sleep 5
-      shell: bash #  inside a composite action, GitHub does not assume a default — hence you must specify it 
+      shell: bash
 
     - run: |
-        while ! curl -s http://localhost:5110/health; do
+        while ! curl -s "${{ inputs.url }}/health"; do
           echo "Waiting for API..."
           sleep 3
         done
         echo "API is up and running!"
-      shell: bash #  inside a composite action, GitHub does not assume a default — hence you must specify it 
+      shell: bash

@@ -41,7 +41,7 @@ jobs:
     - name: Start API
       uses: ./.github/actions/start-api  # The action will start the API and wait until it is ready
       with:
-        api_url: "http://localhost:5110"              
+        url: "http://localhost:5110"              
     
     - name: Run local k6 test
       id: k6
@@ -77,7 +77,7 @@ jobs:
     - name: Start API
       uses: ./.github/actions/start-api  # The action will start the API and wait until it is ready
       with:
-        api_url: "http://localhost:5110"              
+        url: "http://localhost:5110"              
 
     - name: Create test output directory
       run: mkdir -p test-results
