@@ -1,5 +1,5 @@
 name: Start API
-description: Starts the .NET API and waits until it is ready
+description: Starts the demo API and waits until it is ready
 
 inputs:
   url:
