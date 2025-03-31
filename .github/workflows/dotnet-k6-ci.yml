@@ -1,12 +1,9 @@
-name: Build, Performance & Integrtion Test
+name: Build, Performance & Integration Test
 
 on: 
   push:
     branches:
       - develop
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build-and-test:
@@ -41,19 +38,11 @@ jobs:
     - name: Setup K6
       uses: grafana/setup-k6-action@v1
 
-    - name: Start API (Background)
-      run: |
-        dotnet run --project k6demoapi.csproj --urls "http://localhost:5110" &
-        sleep 5  # Initial wait for API to start
-             
-    - name: Wait for API to be ready
-      run: |
-        while ! curl -s http://localhost:5110/health; do
-          echo "Waiting for API..."
-          sleep 3
-        done
-        echo "API is up and running!"
-      
+    - name: Start API
+      uses: ./.github/actions/start-api  # The action will start the API and wait until it is ready
+      with:
+        api_url: "http://localhost:5110"              
+    
     - name: Run local k6 test
       id: k6
       uses: grafana/run-k6-action@v1
@@ -85,18 +74,10 @@ jobs:
     - name: Install Newman
       run: npm install -g newman
 
-    - name: Start API (Background)
-      run: |
-        dotnet run --project k6demoapi.csproj --urls "http://localhost:5110" &
-        sleep 5
-
-    - name: Wait for API to be ready
-      run: |
-        while ! curl -s http://localhost:5110/health; do
-          echo "Waiting for API..."
-          sleep 3
-        done
-        echo "API is up and running!"
+    - name: Start API
+      uses: ./.github/actions/start-api  # The action will start the API and wait until it is ready
+      with:
+        api_url: "http://localhost:5110"              
 
     - name: Create test output directory
       run: mkdir -p test-results
