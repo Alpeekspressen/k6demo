@@ -1,5 +1,11 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { SharedArray } from 'k6/data';
+
+const user2Data = new SharedArray('user2 data', () =>
+  JSON.parse(open('./user2_input.json'))
+);
+
 
 export let options = {
   scenarios: {
@@ -44,8 +50,11 @@ export function user1() {
 }
 
 export function user2() {
-  let res = http.get('http://localhost:5110/?sleep=100', {
-    tags: { scenario: 'user2_scenario' } // Adding a tag to identify scenario
+
+  const data = user2Data[0];
+
+  let res = http.get(`http://localhost:5110/?sleep=${data.param}`, {
+      tags: { scenario: 'user2_scenario' } // Adding a tag to identify scenario
   });
 
   check(res, {
